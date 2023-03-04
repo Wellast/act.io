@@ -1,0 +1,50 @@
+<button onclick="retrieveAuthUrl()" id="auth-button">Auth</button>
+<p id="events"></p>
+<script>
+    let creds = undefined;
+
+    const retrieveAuthUrl = () => {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            console.log(this.responseText);
+            window.open(this.responseText, "_self").focus();
+        }
+        xhttp.open("GET", "/auth", true);
+        xhttp.send();
+    }
+
+    const retrieveCalendarEvents = (creds) => {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            JSON.parse(this.responseText).map((event, i) => {
+                const start = event.start.dateTime || event.start.date;
+                document.getElementById('events').innerHTML += `${start} - ${event.summary}</br>`;
+            });
+        }
+        xhttp.open("GET", `/listEvents?tokens=${creds}`, true);
+        xhttp.send();
+    }
+
+    const alreadyAuthorized = (tokens) => {
+        const authButton = document.getElementById('auth-button');
+        authButton.disabled = true;
+        authButton.innerHTML = `Authorized`;
+        console.log(tokens);
+    }
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    tokens = urlParams.get('tokens');
+    if (tokens) {
+        localStorage.setItem('tokens', tokens);
+        window.location.href = '/';
+    }
+
+    tokens = localStorage.getItem('tokens');
+    if (tokens) {
+        alreadyAuthorized(tokens);
+        retrieveCalendarEvents(tokens);
+    }
+
+</script>
+
