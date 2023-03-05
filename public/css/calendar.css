@@ -1,0 +1,11 @@
+.foundation {
+    height: 5px;
+    padding: 0;
+    background-color: black;
+}
+
+#events-div {
+    position: relative;
+    padding: 0;
+    height: 100px;
+}

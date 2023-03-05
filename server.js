@@ -15,41 +15,36 @@ const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUrl)
 google.options({auth: oauth2Client});
 
 
-
 const listEvents = async (req, res) => {
     oauth2Client.setCredentials(JSON.parse(decodeURIComponent(req.query.tokens)));
+    const tzOffset = Number(req.query.tzoffset) || 0;
 
-    var start = new Date();
-    start.setUTCHours(0,0,0,0);
+    const start = new Date();
+    start.setUTCHours(0,0 + tzOffset,0,0);
 
-    var end = new Date();
-    end.setUTCHours(23,59,59,999);
+    const end = new Date();
+    end.setUTCHours(23,59 + tzOffset,59,999);
+
+    // console.log(start, end)
 
     const calendar = google.calendar({version: 'v3', auth: oauth2Client});
     const calendarRes = await calendar.events.list({
       calendarId: 'primary',
       timeMin: start.toISOString(),
-      // timeMax: end.toISOString(),
+      timeMax: end.toISOString(),
       maxResults: 10,
     });
     const events = calendarRes.data.items;
     if (!events || events.length === 0) {
       return res.sendStatus(204);
     }
-    // events.map((event, i) => {
-    //   const start = event.start.dateTime || event.start.date;
-    //   console.log(`${start} - ${event.summary}`);
-    // });
     res.send(events);
 }
 
 const auth = async (_, res) => {
-    const url = oauth2Client.generateAuthUrl({
-        // 'online' (default) or 'offline' (gets refresh_token)
-        access_type: 'offline',
-        // If you only need one scope you can pass it as a string
-        scope: scopes,
-      });
+  // 'online' (default) or 'offline' (gets refresh_token)
+  // If you only need one scope you can pass it as a string
+    const url = oauth2Client.generateAuthUrl({ access_type: 'offline', scope: scopes });
     res.send(url)
 }
 
