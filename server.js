@@ -1,64 +1,17 @@
-const { google } = require('googleapis');
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-require('dotenv').config();
-
-const clientId = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-const redirectUrl = process.env.REDIRECT_URL;
-
+const routes = require('./routes');
 const app = express();
-const port = 8000;
-const scopes = ['https://www.googleapis.com/auth/calendar.readonly'];
-const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUrl);
+const port = process.env.PORT || 8000;
 
-google.options({auth: oauth2Client});
-
-
-const listEvents = async (req, res) => {
-    oauth2Client.setCredentials(JSON.parse(decodeURIComponent(req.query.tokens)));
-    const tzOffset = Number(req.query.tzoffset) || 0;
-
-    const start = new Date();
-    start.setUTCHours(0,0 + tzOffset,0,0);
-
-    const end = new Date();
-    end.setUTCHours(23,59 + tzOffset,59,999);
-
-    // console.log(start, end)
-
-    const calendar = google.calendar({version: 'v3', auth: oauth2Client});
-    const calendarRes = await calendar.events.list({
-      calendarId: 'primary',
-      timeMin: start.toISOString(),
-      timeMax: end.toISOString(),
-      maxResults: 10,
-    });
-    const events = calendarRes.data.items;
-    if (!events || events.length === 0) {
-      return res.sendStatus(204);
-    }
-    res.send(events);
-}
-
-const auth = async (_, res) => {
-  // 'online' (default) or 'offline' (gets refresh_token)
-  // If you only need one scope you can pass it as a string
-    const url = oauth2Client.generateAuthUrl({ access_type: 'offline', scope: scopes });
-    res.send(url)
-}
-
-const oauth2callback = async (req, res) => {
-    const { tokens } = await oauth2Client.getToken(req.query.code);
-    res.redirect(301, `/?tokens=${encodeURIComponent(JSON.stringify(tokens))}`);
-}
-
-
-
+app.set('view engine', 'pug');
+app.get('/favicon.ico', routes.favicon)
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static('public'));
-app.use('/', express.static('public'));
-app.get('/auth', auth);
-app.all('/oauth2callback', oauth2callback);
-app.get('/listEvents', listEvents);
+app.use('/static', express.static('static'));
+app.get('/', routes.homepage);
+app.get('/auth', routes.auth);
+app.get('/listEvents', routes.listEvents);
+app.get('/oauth2callback', routes.oauth2callback);
+
 app.listen(port, console.log(`Server started on port http://localhost:${port}`));
