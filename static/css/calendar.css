@@ -11,5 +11,12 @@
 }
 
 #events-list-text {
+    float: left;
     width: 25%;
+}
+
+@media screen and (max-width: 600px) {
+    #events-list-text {
+        width: 100%;
+    }
 }
