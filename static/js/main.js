@@ -1,8 +1,36 @@
-const changeBackground = () => document.getElementById('background').src = `https://source.unsplash.com/random/${window.screen.width}x${window.screen.height}?wallpaper`;
 const redirect = (path) => window.location.href = path;
 const getToken = () => localStorage.getItem('token');
 const boundClickToFunc = (elementId, func) => document.getElementById(elementId).addEventListener("click", func);
 const isAuthorized = () => getToken() ? true : false;
+
+const changeBackground = () => {
+    const base64ToBlob = (url) => fetch(`${url}`).then(res => res.blob());
+    const blobToBase64 = (blob) => new Promise((res) => {
+        const reader = new FileReader();
+        reader.onloadend = () => res(reader.result);
+        reader.readAsDataURL(blob);
+    });
+
+    //  setup cached image
+    const bs64Image = localStorage.getItem('image');
+    base64ToBlob(bs64Image)
+        .then((imageBlob) => {
+            console.log(imageBlob)
+            const imageObjectURL = URL.createObjectURL(imageBlob);
+            document.getElementById('background').src = imageObjectURL;
+        });
+
+    //  fetch a new image
+    const url = `https://source.unsplash.com/random/${window.screen.width}x${window.screen.height}?wallpaper`;
+    fetch(url)
+        .then((res) => res.blob())
+        .then((imageBlob) => {
+            const imageObjectURL = URL.createObjectURL(imageBlob);
+            document.getElementById('background').src = imageObjectURL;
+            blobToBase64(imageBlob)
+                .then((result) => localStorage.setItem('image', result));
+        })
+}
 
 const showLoginButton = () => {
     const retrieveAuthUrl = () => fetch('/auth')
