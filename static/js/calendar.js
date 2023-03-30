@@ -1,6 +1,6 @@
 const retrieveCalendarEvents = (token) =>
     fetch(`/listEvents?token=${token}&tzoffset=${(new Date()).getTimezoneOffset()}`)
-        .then((res) => res.json());
+        .then((res) => res.json())
 
 const drawEvents = (events) => {
     document.getElementById('events-div').hidden = false;

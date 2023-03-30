@@ -15,21 +15,28 @@ const changeBackground = () => {
     const bs64Image = localStorage.getItem('image');
     base64ToBlob(bs64Image)
         .then((imageBlob) => {
-            console.log(imageBlob)
             const imageObjectURL = URL.createObjectURL(imageBlob);
             document.getElementById('background').src = imageObjectURL;
         });
 
     //  fetch a new image
-    const url = `https://source.unsplash.com/random/${window.screen.width}x${window.screen.height}?wallpaper`;
-    fetch(url)
-        .then((res) => res.blob())
-        .then((imageBlob) => {
-            const imageObjectURL = URL.createObjectURL(imageBlob);
-            document.getElementById('background').src = imageObjectURL;
-            blobToBase64(imageBlob)
-                .then((result) => localStorage.setItem('image', result));
-        })
+    const cancelFunc = progressCreate();
+    const tags = (localStorage.getItem('tags') || 'wallpaper');
+    const url = `https://source.unsplash.com/random/${window.screen.width}x${window.screen.height}?${tags}`;
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 5000);
+    fetch(url, { signal: controller.signal })
+    .then((res) => res.blob())
+    .then((imageBlob) => {
+        const imageObjectURL = URL.createObjectURL(imageBlob);
+        document.getElementById('background').src = imageObjectURL;
+        blobToBase64(imageBlob)
+        .then((result) => {
+            localStorage.setItem('image', result);
+            cancelFunc();
+        });
+    })
+    .catch(cancelFunc)
 }
 
 const showLoginButton = () => {
@@ -72,6 +79,7 @@ const isLoginAttempt = () => {
         showLogoutButton();
         retrieveCalendarEvents(getToken())
             .then(drawEvents)
+            .catch(console.warn)
     } else {
         showLoginButton();
     }
