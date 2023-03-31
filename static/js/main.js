@@ -62,8 +62,7 @@ const showLogoutButton = () => {
 }
 
 const isLoginAttempt = () => {
-    token = new URLSearchParams(window.location.search)
-        .get('token');
+    token = new URLSearchParams(window.location.search).get('token');
     if (token) {
         localStorage.setItem('token', token);
         return true;
@@ -79,7 +78,7 @@ const isLoginAttempt = () => {
         showLogoutButton();
         retrieveCalendarEvents(getToken())
             .then(drawEvents)
-            .catch(console.warn)
+            .catch((err) => alert(err, 'warning'))
     } else {
         showLoginButton();
     }

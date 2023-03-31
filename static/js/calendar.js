@@ -1,27 +1,32 @@
 const retrieveCalendarEvents = (token) =>
     fetch(`/listEvents?token=${token}&tzoffset=${(new Date()).getTimezoneOffset()}`)
-        .then((res) => res.status === 200 ? res.json() : [])
+        .then((res) => {
+            if (res.status === 200) return res.json();
+            if (res.status === 204) return [];
+            throw Error(`${res.status} Unauthorized. Error retrieving calendar evens. Please try to logout and login`);
+        });
+
+const alert = (message, type) => {
+    const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
+    const wrapper = document.createElement('div')
+    wrapper.innerHTML = [
+        `<div class="alert alert-${type} alert-dismissible" role="alert" style='width: 25%'>`,
+        `   <div>${message}</div>`,
+        '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+        '</div>'
+    ].join('')
+    alertPlaceholder.append(wrapper);
+    setTimeout(() => {
+        try {
+            alertPlaceholder.querySelector('div > div > button').click();
+        } catch (err) {
+            console.warn('[setTimeout close alert button]', err);
+        }
+    }, 5000);
+}
 
 const drawEvents = (events) => {
     if (events.length === 0) {
-        const alert = (message, type) => {
-            const alertPlaceholder = document.getElementById('liveAlertPlaceholder');
-            const wrapper = document.createElement('div')
-            wrapper.innerHTML = [
-                `<div class="alert alert-${type} alert-dismissible" role="alert" style='width: 25%'>`,
-                `   <div>${message}</div>`,
-                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
-                '</div>'
-            ].join('')
-            alertPlaceholder.append(wrapper);
-            setTimeout(() => {
-                try {
-                    alertPlaceholder.querySelector('div > div > button').click();
-                } catch (err) {
-                    console.warn('[setTimeout close alert button]', err);
-                }
-            }, 5000);
-        }
         alert('No events for today', 'success');
         return
     }

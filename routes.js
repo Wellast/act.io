@@ -28,12 +28,17 @@ exports.listEvents = async (req, res) => {
     end.setUTCHours(23,59 + tzOffset,59,999);
 
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-    const calendarRes = await calendar.events.list({
-        calendarId: 'primary',
-        timeMin: start.toISOString(),
-        timeMax: end.toISOString(),
-        maxResults: 10,
-    });
+    let calendarRes;
+    try {
+        calendarRes = await calendar.events.list({
+            calendarId: 'primary',
+            timeMin: start.toISOString(),
+            timeMax: end.toISOString(),
+            maxResults: 10,
+        });
+    } catch (err) {
+        return res.sendStatus(401);
+    }
     const events = calendarRes.data.items;
     if (!events || events.length === 0) {
         return res.sendStatus(204);
@@ -45,7 +50,7 @@ exports.auth = async (_, res) => {
     // 'online' (default) or 'offline' (gets refresh_token)
     // If you only need one scope you can pass it as a string
     const url = oauth2Client.generateAuthUrl({ access_type: 'offline', scope: scopes });
-    res.send(url)
+    res.send(url);
 }
 
 exports.oauth2callback = async (req, res) => {
