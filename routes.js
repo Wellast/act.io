@@ -14,6 +14,11 @@ exports.homepage = (req, res) => {
 }
 
 exports.listEvents = async (req, res) => {
+    // console.log(req.query.token)
+    if (!req.query.token) {
+        return res.sendStatus(400)
+    }
+
     oauth2Client.setCredentials(JSON.parse(decodeURIComponent(req.query.token)));
     const tzOffset = Number(req.query.tzoffset) || 0;
 
@@ -22,7 +27,7 @@ exports.listEvents = async (req, res) => {
     const end = new Date();
     end.setUTCHours(23,59 + tzOffset,59,999);
 
-    const calendar = google.calendar({version: 'v3', auth: oauth2Client});
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     const calendarRes = await calendar.events.list({
         calendarId: 'primary',
         timeMin: start.toISOString(),
