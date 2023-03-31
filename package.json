@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "node ./server.js"
+  },
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",
     "@googleapis/docs": "^2.0.0",

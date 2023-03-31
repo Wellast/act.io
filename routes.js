@@ -54,8 +54,11 @@ exports.auth = async (_, res) => {
 }
 
 exports.oauth2callback = async (req, res) => {
+    if (!req?.query?.code) {
+        return res.redirect(301, '/');
+    }
     const { tokens } = await oauth2Client.getToken(req.query.code);
-    res.redirect(301, `/?token=${encodeURIComponent(JSON.stringify(tokens))}`);
+    return res.redirect(301, `/?token=${encodeURIComponent(JSON.stringify(tokens))}`);
 }
 
 exports.favicon = (req, res) => res.sendFile('static/favicon.ico', { root : __dirname});
