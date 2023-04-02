@@ -54,7 +54,7 @@ exports.auth = async (_, res) => {
 }
 
 exports.oauth2callback = async (req, res) => {
-    if (!req || req.query || req.query.code) {
+    if (!req || !req.query || !req.query.code) {
         return res.redirect(301, '/');
     }
     const { tokens } = await oauth2Client.getToken(req.query.code);
