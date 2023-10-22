@@ -1,36 +1,36 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata:
+metadata: 
   name: project1
-  labels:
+  labels: 
     app: cs2server
     owner: project1
-spec:
+spec: 
   replicas: 1
-  selector:
-    matchLabels:
+  selector: 
+    matchLabels: 
       owner: project1
-  template:
-    metadata:
-      labels:
+  template: 
+    metadata: 
+      labels: 
         owner: project1
-    spec:
+    spec: 
       # volumes:
       # - name: project1-volume
       #   persistentVolumeClaim:
       #     claimName: project1-volume-claim
-      containers:
-      - name: project1
-        image: joedwards32/cs2:latest
+      containers: 
+        - name: project1
+          image: joedwards32/cs2:latest
         # volumeMounts:
         # - mountPath: /home/steam/cs2-dedicated/
         #   name: project1-volume
-        ports:
-        - containerPort: 8080
-        env:
-        - name: STEAMUSER
-          value: "***********"
-        - name: STEAMPASS
-          value: "***********"
-        - name: STEAMGUARD
-          value: "*****"
+          ports: 
+            - containerPort: 8080
+          env: 
+            - name: STEAMUSER
+              value: "***********"
+            - name: STEAMPASS
+              value: "***********"
+            - name: STEAMGUARD
+              value: "*****"

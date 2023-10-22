@@ -1,0 +1,9 @@
+kind: Service
+apiVersion: v1
+metadata: 
+    name: cs2server-service
+spec: 
+    selector: 
+        app: cs2server
+    ports: 
+        - port: 8080

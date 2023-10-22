@@ -6,7 +6,6 @@ import (
 	v1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 var DefaultDeployment = &appsv1.Deployment{
@@ -46,12 +45,12 @@ var DefaultDeployment = &appsv1.Deployment{
 }
 
 /*	GET DEPLOYMENTS example:
-	list, err := k8s.GetDepoyments(k8sClient, "default")
+	list, err := k8s.GetDepoyments("default")
 	for _, d := range list.Items {
 		fmt.Printf(" * %s (%d replicas)\n", d.Name, *d.Spec.Replicas)
 	}
 */
-func GetDepoyments(k8sClient *kubernetes.Clientset, namespace string) (*v1.DeploymentList, error) {
+func GetDepoyments(namespace string) (*v1.DeploymentList, error) {
 	if namespace == "" {
 		namespace = apiv1.NamespaceDefault
 	}
@@ -67,10 +66,10 @@ func GetDepoyments(k8sClient *kubernetes.Clientset, namespace string) (*v1.Deplo
 }
 
 /*	CREATE DEPLOYMENT example:
-result, err := k8s.CreateDeployment(k8sClient, "default", k8s.DefaultDeployment)
+result, err := k8s.CreateDeployment("default", k8s.DefaultDeployment)
 	fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
 */
-func CreateDeployment(k8sClient *kubernetes.Clientset, namespace string, deployment *appsv1.Deployment) (*v1.Deployment, error) {
+func CreateDeployment(namespace string, deployment *appsv1.Deployment) (*v1.Deployment, error) {
 	if namespace == "" {
 		namespace = apiv1.NamespaceDefault
 	}
@@ -84,9 +83,9 @@ func CreateDeployment(k8sClient *kubernetes.Clientset, namespace string, deploym
 }
 
 /*	DELETE DEPLOYMENT example:
-err = k8s.DeleteDeployment(k8sClient, "default", "demo-deployment")
+err = k8s.DeleteDeployment("default", "demo-deployment")
 */
-func DeleteDeployment(k8sClient *kubernetes.Clientset, namespace string, name string) error {
+func DeleteDeployment(namespace string, name string) error {
 	if namespace == "" {
 		namespace = apiv1.NamespaceDefault
 	}
