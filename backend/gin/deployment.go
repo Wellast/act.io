@@ -3,28 +3,24 @@ package gin
 import (
 	"controller/k8s"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func getDeployment(c *gin.Context) {
 	namespace := c.Query("namespace")
-	_ = c.Query("name")
-	if namespace == "" {
-		c.String(http.StatusInternalServerError, errors.New("namespace or name is not defined").Error())
+	name := c.Query("name")
+	if namespace == "" || name == "" {
+		c.String(http.StatusForbidden, errors.New("namespace or name is not defined").Error())
 		return
 	}
 
-	list, err := k8s.GetDepoyments(namespace)
+	deployment, err := k8s.GetDepoyments(namespace, name)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		c.String(http.StatusForbidden, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, list.Items)
-	for _, d := range list.Items {
-		fmt.Printf(" * %s (%d replicas)\n", d.Name, *d.Spec.Replicas)
-	}
+	c.JSON(http.StatusOK, deployment)
 	return
 }
 
@@ -33,7 +29,7 @@ func createDeployment(c *gin.Context) {
 	name := c.PostForm("name")
 
 	if namespace == "" || name == "" {
-		c.String(http.StatusInternalServerError, errors.New("namespace or name is not defined").Error())
+		c.String(http.StatusForbidden, errors.New("namespace or name is not defined").Error())
 		return
 	}
 
@@ -101,7 +97,7 @@ func deleteDeployment(c *gin.Context) {
 	name := c.Query("name")
 
 	if namespace == "" || name == "" {
-		c.String(http.StatusInternalServerError, errors.New("namespace or name is not defined").Error())
+		c.String(http.StatusForbidden, errors.New("namespace or name is not defined").Error())
 		return
 	}
 

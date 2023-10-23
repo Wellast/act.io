@@ -45,24 +45,18 @@ var DefaultDeployment = &appsv1.Deployment{
 }
 
 /*	GET DEPLOYMENTS example:
-	list, err := k8s.GetDepoyments("default")
+	list, err := k8s.GetDepoyments("default", "cs2server")
 	for _, d := range list.Items {
 		fmt.Printf(" * %s (%d replicas)\n", d.Name, *d.Spec.Replicas)
 	}
 */
-func GetDepoyments(namespace string) (*v1.DeploymentList, error) {
-	if namespace == "" {
-		namespace = apiv1.NamespaceDefault
-	}
-
-	deploymentsClient := k8sClient.AppsV1().Deployments(namespace)
-
-	list, err := deploymentsClient.List(context.TODO(), metav1.ListOptions{})
+func GetDepoyments(namespace, name string) (*v1.Deployment, error) {
+	deployment, err := k8sClient.AppsV1().Deployments(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return list, nil
+	return deployment, nil
 }
 
 /*	CREATE DEPLOYMENT example:
