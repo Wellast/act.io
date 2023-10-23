@@ -10,7 +10,7 @@ import (
 
 var DefaultDeployment = &appsv1.Deployment{
 	ObjectMeta: metav1.ObjectMeta{
-		Name: "demo-deployment",
+		Name: "",
 	},
 	Spec: appsv1.DeploymentSpec{
 		Replicas: int32Ptr(1),
@@ -34,7 +34,7 @@ var DefaultDeployment = &appsv1.Deployment{
 							{
 								Name:          "http",
 								Protocol:      apiv1.ProtocolTCP,
-								ContainerPort: 80,
+								ContainerPort: 8080,
 							},
 						},
 					},

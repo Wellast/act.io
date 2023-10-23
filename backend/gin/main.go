@@ -11,7 +11,7 @@ func setupRouter() *gin.Engine {
 
 	r.GET("/api/v1/deployment", getDeployment)
 	r.POST("/api/v1/deployment", createDeployment)
-	r.DELETE("/api/v1/deployment/:name", deleteDeployment)
+	r.DELETE("/api/v1/deployment/:namespace", deleteDeployment)
 
 	return r
 }
