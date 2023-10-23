@@ -20,7 +20,7 @@ func CreateIngress(namespace, name string) (*networkingv1.Ingress, error) {
 		networkingv1.IngressSpec{
 			Rules: []networkingv1.IngressRule{
 				networkingv1.IngressRule{
-					"", networkingv1.IngressRuleValue{
+					namespace + "." + name + ".actio.live", networkingv1.IngressRuleValue{
 						HTTP: &networkingv1.HTTPIngressRuleValue{
 							Paths: []networkingv1.HTTPIngressPath{
 								networkingv1.HTTPIngressPath{

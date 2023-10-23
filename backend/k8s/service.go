@@ -21,8 +21,8 @@ func CreateService(namespace, name string) (*coreV1.Service, error) {
 		},
 		coreV1.ServiceSpec{
 			Selector: map[string]string{
-				"app":   name,
-				"owner": namespace,
+				"app":       name,
+				"namespace": namespace,
 			},
 			Ports: []coreV1.ServicePort{
 				{

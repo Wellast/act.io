@@ -16,13 +16,13 @@ var DefaultDeployment = &appsv1.Deployment{
 		Replicas: int32Ptr(1),
 		Selector: &metav1.LabelSelector{
 			MatchLabels: map[string]string{
-				"app": "cs2server",
+				//				"app": "cs2server",
 			},
 		},
 		Template: apiv1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: map[string]string{
-					"app": "cs2server",
+					//					"app": "cs2server",
 				},
 			},
 			Spec: apiv1.PodSpec{

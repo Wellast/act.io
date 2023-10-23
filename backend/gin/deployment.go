@@ -58,7 +58,10 @@ func createDeployment(c *gin.Context) {
 	//	DEPLOYMENT
 	customDeployment := k8s.DefaultDeployment
 	customDeployment.ObjectMeta.Name = name
-	customDeployment.Spec.Template.ObjectMeta.Labels["owner"] = namespace
+	customDeployment.Spec.Selector.MatchLabels["app"] = name
+	customDeployment.Spec.Selector.MatchLabels["namespace"] = namespace
+	customDeployment.Spec.Template.ObjectMeta.Labels["app"] = name
+	customDeployment.Spec.Template.ObjectMeta.Labels["namespace"] = namespace
 	_, err = k8s.CreateDeployment(namespace, customDeployment)
 	if err != nil {
 		progress["deleted"].(gin.H)["deployment"] = err.Error()
