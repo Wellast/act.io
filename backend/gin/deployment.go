@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strings"
 )
 
 func getDeployment(c *gin.Context) {
 	namespace := c.Query("namespace")
+	_ = c.Query("name")
 	if namespace == "" {
-		c.String(http.StatusInternalServerError, errors.New("?namespace= is not defined").Error())
+		c.String(http.StatusInternalServerError, errors.New("namespace or name is not defined").Error())
 		return
 	}
 
@@ -29,70 +29,114 @@ func getDeployment(c *gin.Context) {
 }
 
 func createDeployment(c *gin.Context) {
-	var progress []string
 	namespace := c.PostForm("namespace")
-	if namespace == "" {
-		c.String(http.StatusInternalServerError, errors.New("namespace is not defined").Error())
+	name := c.PostForm("name")
+
+	if namespace == "" || name == "" {
+		c.String(http.StatusInternalServerError, errors.New("namespace or name is not defined").Error())
 		return
+	}
+
+	progress := gin.H{
+		"namespace": namespace,
+		"name":      name,
+		"error":     false,
+		"deleted":   gin.H{},
 	}
 
 	//	NAMESPACE
-	ns, err := k8s.CreateNamespace(namespace)
+	_, err := k8s.CreateNamespace(namespace)
 	if err != nil {
-		if err.Error() == "namespaces \""+namespace+"\" already exists" {
-			ns, err = k8s.GetNamespace(namespace)
-			if err != nil {
-				c.String(http.StatusInternalServerError, err.Error())
-				return
-			}
-		} else {
-			c.String(http.StatusInternalServerError, err.Error())
+		if err.Error() != "namespaces \""+namespace+"\" already exists" {
+			progress["deleted"].(gin.H)["namespace"] = err.Error()
+			progress["error"] = true
+			c.JSON(http.StatusForbidden, progress)
 			return
 		}
 	}
-	fmt.Println("namespace: ", ns.GetObjectMeta().GetName())
-	progress = append(progress, "+namespace")
 
 	//	DEPLOYMENT
 	customDeployment := k8s.DefaultDeployment
-	customDeployment.ObjectMeta.Name = namespace
+	customDeployment.ObjectMeta.Name = name
 	customDeployment.Spec.Template.ObjectMeta.Labels["owner"] = namespace
-	deployment, err := k8s.CreateDeployment(namespace, customDeployment)
+	_, err = k8s.CreateDeployment(namespace, customDeployment)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
+		progress["deleted"].(gin.H)["deployment"] = err.Error()
+		progress["error"] = true
+	} else {
+		progress["deleted"].(gin.H)["deployment"] = "success"
 	}
-	fmt.Println("deployment", deployment.GetObjectMeta().GetName())
-	progress = append(progress, "+deployment")
 
 	//	SERVICE
-	service, err := k8s.CreateService(namespace)
+	_, err = k8s.CreateService(namespace, name)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
+		progress["deleted"].(gin.H)["service"] = err.Error()
+		progress["error"] = true
+	} else {
+		progress["deleted"].(gin.H)["service"] = "success"
 	}
-	fmt.Println("service:", service.GetObjectMeta().GetName())
-	progress = append(progress, "+service")
 
 	//	INGRESS
-	ingress, err := k8s.CreateIngress(namespace)
+	_, err = k8s.CreateIngress(namespace, name)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
+		progress["deleted"].(gin.H)["ingress"] = err.Error()
+		progress["error"] = true
+	} else {
+		progress["deleted"].(gin.H)["ingress"] = "success"
 	}
-	fmt.Println(ingress.GetObjectMeta().GetName())
-	progress = append(progress, "+ingress")
 
-	c.String(http.StatusOK, strings.Join(progress, " "))
+	if progress["error"] == false {
+		c.JSON(http.StatusOK, progress)
+	} else {
+		c.JSON(http.StatusForbidden, progress)
+	}
 	return
 }
 
 func deleteDeployment(c *gin.Context) {
-	namespace := c.Params.ByName("namespace")
-	err := k8s.DeleteNamespace(namespace)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+	namespace := c.Query("namespace")
+	name := c.Query("name")
+
+	if namespace == "" || name == "" {
+		c.String(http.StatusInternalServerError, errors.New("namespace or name is not defined").Error())
 		return
 	}
-	c.String(http.StatusOK, "namespace "+namespace+" deleted")
+
+	progress := gin.H{
+		"namespace": namespace,
+		"name":      name,
+		"error":     false,
+		"deleted":   gin.H{},
+	}
+
+	err := k8s.DeleteDeployment(namespace, name)
+	if err != nil {
+		progress["deleted"].(gin.H)["deployment"] = err.Error()
+		progress["error"] = true
+	} else {
+		progress["deleted"].(gin.H)["deployment"] = "success"
+	}
+
+	err = k8s.DeleteService(namespace, name)
+	if err != nil {
+		progress["deleted"].(gin.H)["service"] = err.Error()
+		progress["error"] = true
+	} else {
+		progress["deleted"].(gin.H)["service"] = "success"
+	}
+
+	err = k8s.DeleteIngress(namespace, name)
+	if err != nil {
+		progress["deleted"].(gin.H)["ingress"] = err.Error()
+		progress["error"] = true
+	} else {
+		progress["deleted"].(gin.H)["ingress"] = "success"
+	}
+
+	if progress["error"] == false {
+		c.JSON(http.StatusOK, progress)
+	} else {
+		c.JSON(http.StatusForbidden, progress)
+	}
+	return
 }

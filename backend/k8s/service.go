@@ -9,24 +9,24 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func CreateService(namespace string) (*coreV1.Service, error) {
-	if namespace == "" {
-		return nil, errors.New("No namespace defined")
+func CreateService(namespace, name string) (*coreV1.Service, error) {
+	if namespace == "" || name == "" {
+		return nil, errors.New("no namespace or name defined")
 	}
 
 	service2Create := &apiv1.Service{
 		metav1.TypeMeta{Kind: "Service", APIVersion: "v1"},
 		metav1.ObjectMeta{
-			Name: namespace,
+			Name: name,
 		},
 		coreV1.ServiceSpec{
 			Selector: map[string]string{
-				"app":   "cs2server",
+				"app":   name,
 				"owner": namespace,
 			},
 			Ports: []coreV1.ServicePort{
 				{
-					Name:       "cs2server",
+					Name:       "tcp",
 					Port:       8080,
 					Protocol:   apiv1.ProtocolTCP,
 					TargetPort: intstr.FromInt32(8080),
@@ -43,4 +43,16 @@ func CreateService(namespace string) (*coreV1.Service, error) {
 	}
 
 	return service, nil
+}
+
+func DeleteService(namespace, name string) error {
+	if namespace == "" || name == "" {
+		return errors.New("no namespace or name defined")
+	}
+
+	err := k8sClient.CoreV1().Services(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+	return nil
 }

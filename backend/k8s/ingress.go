@@ -2,19 +2,20 @@ package k8s
 
 import (
 	"context"
-	"fmt"
 	networkingv1 "k8s.io/api/networking/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/json"
 )
 
-func CreateIngress(namespace string) (*networkingv1.Ingress, error) {
+func CreateIngress(namespace, name string) (*networkingv1.Ingress, error) {
 	ptp := networkingv1.PathTypePrefix
 	ingress2Create := networkingv1.Ingress{
 		v1.TypeMeta{APIVersion: "networking.k8s.io/v1", Kind: "Ingress"},
 		v1.ObjectMeta{
-			Name:        namespace,
-			Annotations: map[string]string{},
+			Name: name,
+			Annotations: map[string]string{
+				"namespace": namespace,
+				"name":      name,
+			},
 		},
 		networkingv1.IngressSpec{
 			Rules: []networkingv1.IngressRule{
@@ -27,7 +28,7 @@ func CreateIngress(namespace string) (*networkingv1.Ingress, error) {
 									Path:     "/",
 									Backend: networkingv1.IngressBackend{
 										Service: &networkingv1.IngressServiceBackend{
-											Name: namespace,
+											Name: name,
 											Port: networkingv1.ServiceBackendPort{Number: 8080},
 										},
 									},
@@ -40,8 +41,6 @@ func CreateIngress(namespace string) (*networkingv1.Ingress, error) {
 		},
 		networkingv1.IngressStatus{},
 	}
-	b, _ := json.Marshal(ingress2Create)
-	fmt.Println(string(b))
 	ingress, err := k8sClient.NetworkingV1().Ingresses(namespace).Create(
 		context.TODO(),
 		&ingress2Create,
@@ -51,5 +50,15 @@ func CreateIngress(namespace string) (*networkingv1.Ingress, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return ingress, nil
+}
+
+func DeleteIngress(namespace, name string) error {
+	err := k8sClient.NetworkingV1().Ingresses(namespace).Delete(context.TODO(), name, v1.DeleteOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
