@@ -8,7 +8,6 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 )
 
-var restartPolicyNever = apiv1.ContainerRestartPolicy("Never")
 var backoffLimit = int32(0)
 var DefaultSteamJob = v1.Job{
 	TypeMeta: metav1.TypeMeta{
@@ -22,9 +21,12 @@ var DefaultSteamJob = v1.Job{
 		BackoffLimit: &backoffLimit,
 		Template: apiv1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Labels: map[string]string{},
+				Labels: map[string]string{
+					"name": "steam-init",
+				},
 			},
 			Spec: apiv1.PodSpec{
+				RestartPolicy: "Never",
 				Volumes: []apiv1.Volume{
 					{
 						Name: "REPLACE",
@@ -37,10 +39,9 @@ var DefaultSteamJob = v1.Job{
 				},
 				Containers: []apiv1.Container{
 					{
-						Name:          "steam-init",
-						Image:         "cm2network/steamcmd",
-						Args:          []string{},
-						RestartPolicy: &restartPolicyNever,
+						Name:  "steam-init",
+						Image: "cm2network/steamcmd",
+						Args:  []string{},
 						VolumeMounts: []apiv1.VolumeMount{
 							{
 								Name:      "REPLACE",
@@ -54,17 +55,17 @@ var DefaultSteamJob = v1.Job{
 	},
 }
 
-func GetJob(namespace, name string) (*apiv1.Pod, error) {
-	pod, err := k8sClient.CoreV1().Pods(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+func GetJob(namespace, name string) (*v1.Job, error) {
+	job, err := k8sClient.BatchV1().Jobs(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 
-	return pod, nil
+	return job, nil
 }
 
-func CreateJob(namespace string, pod *apiv1.Pod) (*apiv1.Pod, error) {
-	result, err := k8sClient.CoreV1().Pods(namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
+func CreateJob(namespace string, job v1.Job) (*v1.Job, error) {
+	result, err := k8sClient.BatchV1().Jobs(namespace).Create(context.TODO(), &job, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -72,10 +73,7 @@ func CreateJob(namespace string, pod *apiv1.Pod) (*apiv1.Pod, error) {
 }
 
 func DeleteJob(namespace string, name string) error {
-	deletePolicy := metav1.DeletePropagationForeground
-	err := k8sClient.CoreV1().Pods(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{
-		PropagationPolicy: &deletePolicy,
-	})
+	err := k8sClient.BatchV1().Jobs(namespace).Delete(context.TODO(), name, metav1.DeleteOptions{})
 	if err != nil {
 		return err
 	}
@@ -83,7 +81,7 @@ func DeleteJob(namespace string, name string) error {
 }
 
 func WatchJob(namespace string, name string) (<-chan watch.Event, error) {
-	w, err := k8sClient.CoreV1().Pods(namespace).Watch(context.TODO(), metav1.ListOptions{
+	w, err := k8sClient.BatchV1().Jobs(namespace).Watch(context.TODO(), metav1.ListOptions{
 		LabelSelector: name,
 	})
 	if err != nil {

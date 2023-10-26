@@ -9,6 +9,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
+func GetService(namespace string, name string) (*coreV1.Service, error) {
+	ns, err := k8sClient.CoreV1().Services(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return ns, nil
+}
+
 func CreateService(namespace, name string) (*coreV1.Service, error) {
 	if namespace == "" || name == "" {
 		return nil, errors.New("no namespace or name defined")

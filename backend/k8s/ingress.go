@@ -6,6 +6,14 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func GetIngress(namespace string, name string) (*networkingv1.Ingress, error) {
+	ingress, err := k8sClient.NetworkingV1().Ingresses(namespace).Get(context.TODO(), name, v1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return ingress, nil
+}
+
 func CreateIngress(namespace, name string) (*networkingv1.Ingress, error) {
 	ptp := networkingv1.PathTypePrefix
 	ingress2Create := networkingv1.Ingress{

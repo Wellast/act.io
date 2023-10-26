@@ -7,13 +7,6 @@ import (
 
 type IConf struct {
 	KubeConfPath string `yaml:"kube_conf_path"`
-	Steam        ISteam `yaml:"steam"`
-}
-
-type ISteam struct {
-	Guardcode string `yaml:"guardcode"`
-	Username  string `yaml:"username"`
-	Password  string `yaml:"password"`
 }
 
 func GetConf(configPath string) (c IConf, err error) {

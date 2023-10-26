@@ -15,9 +15,9 @@ func GetPersistentVolumeClaim(namespace string, name string) (*coreV1.Persistent
 	return ns, nil
 }
 
-func CreatePersistentVolumeClaim(namespace string, name string) (*coreV1.PersistentVolumeClaim, error) {
+func CreatePersistentVolumeClaim(namespace string, name string, quantity string) (*coreV1.PersistentVolumeClaim, error) {
 	qv := resource.QuantityValue{}
-	_ = qv.Set("45Gi")
+	_ = qv.Set(quantity)
 	ns, err := k8sClient.CoreV1().PersistentVolumeClaims(namespace).Create(
 		context.TODO(),
 		&coreV1.PersistentVolumeClaim{
