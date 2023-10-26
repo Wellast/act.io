@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata: 
+    name: steam-init
+spec: 
+    template: 
+        spec: 
+            volumes: 
+                - name: project1-volume
+                  persistentVolumeClaim: 
+                      claimName: project1-volume-claim
+            containers: 
+                - name: steam-init
+                  image: cm2network/steamcmd
+                  command: ["bash",  "/home/steam/steamcmd/steamcmd.sh", "+login", "[STEAMUSER]", "[ACCOUNTPASSWORD]", "+quit"]
+                restartPolicy: Never
+        backoffLimit: 0

@@ -15,16 +15,16 @@ spec:
       labels: 
         owner: project1
     spec: 
-      # volumes:
-      # - name: project1-volume
-      #   persistentVolumeClaim:
-      #     claimName: project1-volume-claim
+      volumes: 
+        - name: project1-volume
+          persistentVolumeClaim: 
+            claimName: project1-volume-claim
       containers: 
         - name: project1
           image: joedwards32/cs2:latest
-        # volumeMounts:
-        # - mountPath: /home/steam/cs2-dedicated/
-        #   name: project1-volume
+        volumeMounts: 
+          - mountPath: /home/steam/cs2-dedicated/
+            name: project1-volume
           ports: 
             - containerPort: 8080
           env: 

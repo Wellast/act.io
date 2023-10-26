@@ -1,21 +1,31 @@
 package main
 
 import (
+	"controller/config"
 	"controller/gin"
 	"controller/k8s"
-	"flag"
-	//	"fmt"
-
-	"k8s.io/client-go/util/homedir"
-	"path/filepath"
+	"github.com/alexflint/go-arg"
 )
 
+var args struct {
+	Config string `arg:"required"`
+}
+
 func main() {
-	kubeconfig := *flag.String("kubeconfig", filepath.Join(homedir.HomeDir(), ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	err := k8s.ConnectToKubernetes(kubeconfig)
+	err := arg.Parse(&args)
 	if err != nil {
 		panic(err)
 	}
 
-	panic(gin.RunGin())
+	conf, err := config.GetConf(args.Config)
+	if err != nil {
+		panic(err)
+	}
+
+	err = k8s.ConnectToKubernetes(conf)
+	if err != nil {
+		panic(err)
+	}
+
+	panic(gin.RunGin(conf))
 }
