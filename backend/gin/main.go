@@ -1,13 +1,10 @@
 package gin
 
 import (
-	"controller/config"
 	_ "net/http"
 
 	"github.com/gin-gonic/gin"
 )
-
-var appConfig config.IConf
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
@@ -19,9 +16,7 @@ func setupRouter() *gin.Engine {
 	return r
 }
 
-func RunGin(conf config.IConf) error {
-	appConfig = conf
-
+func RunGin() error {
 	r := setupRouter()
 	return r.Run(":8080")
 }

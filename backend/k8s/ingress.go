@@ -6,12 +6,18 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func GetIngress(namespace string, name string) (*networkingv1.Ingress, error) {
+func GetIngress(namespace string, name string) (*networkingv1.Ingress, *networkingv1.IngressList, error) {
 	ingress, err := k8sClient.NetworkingV1().Ingresses(namespace).Get(context.TODO(), name, v1.GetOptions{})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return ingress, nil
+	list, _ := k8sClient.NetworkingV1().Ingresses(namespace).List(context.TODO(), v1.ListOptions{
+		LabelSelector: "name=" + name + ",namespace=" + namespace,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+	return ingress, list, nil
 }
 
 func CreateIngress(namespace, name string) (*networkingv1.Ingress, error) {
@@ -19,8 +25,9 @@ func CreateIngress(namespace, name string) (*networkingv1.Ingress, error) {
 	ingress2Create := networkingv1.Ingress{
 		v1.TypeMeta{APIVersion: "networking.k8s.io/v1", Kind: "Ingress"},
 		v1.ObjectMeta{
-			Name: name,
-			Annotations: map[string]string{
+			Name:      name,
+			Namespace: namespace,
+			Labels: map[string]string{
 				"namespace": namespace,
 				"name":      name,
 			},

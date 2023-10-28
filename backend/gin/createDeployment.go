@@ -7,72 +7,6 @@ import (
 	"net/http"
 )
 
-func getDeployment(c *gin.Context) {
-	namespace := c.Query("namespace")
-	name := c.Query("name")
-	if namespace == "" || name == "" {
-		c.String(http.StatusForbidden, errors.New("namespace or name is not defined").Error())
-		return
-	}
-
-	progress := gin.H{
-		"namespace": namespace,
-		"name":      name,
-		"error":     false,
-		"status":    gin.H{},
-	}
-
-	ns, err := k8s.GetNamespace(namespace)
-	if err != nil {
-		progress["error"] = true
-		progress["status"].(gin.H)["namespace"] = err.Error()
-	} else {
-		progress["status"].(gin.H)["namespace"] = ns.GetObjectMeta()
-	}
-
-	pvcSteam, err := k8s.GetPersistentVolumeClaim(namespace, name+"-steam")
-	if err != nil {
-		progress["error"] = true
-		progress["status"].(gin.H)["pvc_steam"] = err.Error()
-	} else {
-		progress["status"].(gin.H)["pvc_steam"] = pvcSteam
-	}
-	pvcGameserver, err := k8s.GetPersistentVolumeClaim(namespace, name+"-gameserver")
-	if err != nil {
-		progress["error"] = true
-		progress["status"].(gin.H)["pvc_gameserver"] = err.Error()
-	} else {
-		progress["status"].(gin.H)["pvc_gameserver"] = pvcGameserver
-	}
-
-	deployment, err := k8s.GetDepoyments(namespace, name)
-	if err != nil {
-		progress["error"] = true
-		progress["status"].(gin.H)["deployment"] = err.Error()
-	} else {
-		progress["status"].(gin.H)["deployment"] = deployment.GetObjectMeta()
-	}
-
-	service, err := k8s.GetService(namespace, name)
-	if err != nil {
-		progress["error"] = true
-		progress["status"].(gin.H)["service"] = err.Error()
-	} else {
-		progress["status"].(gin.H)["service"] = service.GetObjectMeta()
-	}
-
-	ingress, err := k8s.GetIngress(namespace, name)
-	if err != nil {
-		progress["error"] = true
-		progress["status"].(gin.H)["ingress"] = err.Error()
-	} else {
-		progress["status"].(gin.H)["ingress"] = ingress.GetObjectMeta()
-	}
-
-	c.JSON(http.StatusOK, progress)
-	return
-}
-
 func createDeployment(c *gin.Context) {
 	namespace := c.PostForm("namespace")
 	name := c.PostForm("name")
@@ -183,62 +117,6 @@ func createDeployment(c *gin.Context) {
 
 	//	INGRESS
 	_, err = k8s.CreateIngress(namespace, name)
-	if err != nil {
-		progress["status"].(gin.H)["ingress"] = err.Error()
-		progress["error"] = true
-	} else {
-		progress["status"].(gin.H)["ingress"] = "success"
-	}
-
-	if progress["error"] == false {
-		c.JSON(http.StatusOK, progress)
-	} else {
-		c.JSON(http.StatusForbidden, progress)
-	}
-	return
-}
-
-func deleteDeployment(c *gin.Context) {
-	namespace := c.Query("namespace")
-	name := c.Query("name")
-
-	if namespace == "" || name == "" {
-		c.String(http.StatusForbidden, errors.New("namespace or name is not defined").Error())
-		return
-	}
-
-	progress := gin.H{
-		"namespace": namespace,
-		"name":      name,
-		"error":     false,
-		"status":    gin.H{},
-	}
-
-	err := k8s.DeleteJob(namespace, "steam-init")
-	if err != nil {
-		progress["status"].(gin.H)["job"] = err.Error()
-		progress["error"] = true
-	} else {
-		progress["status"].(gin.H)["job"] = "success"
-	}
-
-	err = k8s.DeleteDeployment(namespace, name)
-	if err != nil {
-		progress["status"].(gin.H)["deployment"] = err.Error()
-		progress["error"] = true
-	} else {
-		progress["status"].(gin.H)["deployment"] = "success"
-	}
-
-	err = k8s.DeleteService(namespace, name)
-	if err != nil {
-		progress["status"].(gin.H)["service"] = err.Error()
-		progress["error"] = true
-	} else {
-		progress["status"].(gin.H)["service"] = "success"
-	}
-
-	err = k8s.DeleteIngress(namespace, name)
 	if err != nil {
 		progress["status"].(gin.H)["ingress"] = err.Error()
 		progress["error"] = true

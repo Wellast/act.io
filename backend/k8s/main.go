@@ -1,18 +1,15 @@
 package k8s
 
 import (
-	"controller/config"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 var k8sClient *kubernetes.Clientset
-var appConfig config.IConf
 
-func ConnectToKubernetes(conf config.IConf) error {
-	appConfig = conf
+func ConnectToKubernetes(kubeConfPath string) error {
 
-	restConf, err := clientcmd.BuildConfigFromFlags("", appConfig.KubeConfPath)
+	restConf, err := clientcmd.BuildConfigFromFlags("", kubeConfPath)
 	if err != nil {
 		return err
 	}

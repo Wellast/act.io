@@ -21,18 +21,18 @@ func CreatePersistentVolumeClaim(namespace string, name string, quantity string)
 	ns, err := k8sClient.CoreV1().PersistentVolumeClaims(namespace).Create(
 		context.TODO(),
 		&coreV1.PersistentVolumeClaim{
-			v1.TypeMeta{
+			TypeMeta: v1.TypeMeta{
 				APIVersion: "v1",
 				Kind:       "PersistentVolumeClaim",
 			},
-			v1.ObjectMeta{
+			ObjectMeta: v1.ObjectMeta{
 				Name: name,
 				Labels: map[string]string{
 					"name":      name,
 					"namespace": namespace,
 				},
 			},
-			coreV1.PersistentVolumeClaimSpec{
+			Spec: coreV1.PersistentVolumeClaimSpec{
 				AccessModes: []coreV1.PersistentVolumeAccessMode{coreV1.ReadWriteOnce},
 				Resources: coreV1.ResourceRequirements{
 					Requests: coreV1.ResourceList{
@@ -40,7 +40,7 @@ func CreatePersistentVolumeClaim(namespace string, name string, quantity string)
 					},
 				},
 			},
-			coreV1.PersistentVolumeClaimStatus{},
+			Status: coreV1.PersistentVolumeClaimStatus{},
 		},
 		v1.CreateOptions{},
 	)

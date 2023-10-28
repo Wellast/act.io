@@ -2,8 +2,8 @@ package k8s
 
 import (
 	"context"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	coreV1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func GetNamespace(namespace string) (*coreV1.Namespace, error) {
@@ -18,10 +18,13 @@ func CreateNamespace(namespace string) (*coreV1.Namespace, error) {
 	ns, err := k8sClient.CoreV1().Namespaces().Create(
 		context.TODO(),
 		&coreV1.Namespace{
-			v1.TypeMeta{},
-			v1.ObjectMeta{Name: namespace},
-			coreV1.NamespaceSpec{},
-			coreV1.NamespaceStatus{},
+			TypeMeta: v1.TypeMeta{},
+			ObjectMeta: v1.ObjectMeta{
+				Name:   namespace,
+				Labels: map[string]string{},
+			},
+			Spec:   coreV1.NamespaceSpec{},
+			Status: coreV1.NamespaceStatus{},
 		},
 		v1.CreateOptions{},
 	)
