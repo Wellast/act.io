@@ -1,0 +1,12 @@
+- name: start an instance with a public IP address
+  amazon.aws.ec2_instance: 
+      name: "{{tagOwner}}-{{tagName}}"
+      key_name: "{{ssh_key}}"
+      vpc_subnet_id: "{{ec2_conf.subnet_id}}"
+      instance_type: "{{ec2_conf.instance_type}}"
+      security_group: default
+      network: 
+          assign_public_ip: true
+      image_id: ec2_conf.image
+      tags: 
+          Environment: Testing

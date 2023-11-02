@@ -47,13 +47,13 @@ func deleteDeployment(c *gin.Context) {
 		progress["status"].(gin.H)["service"] = "success"
 	}
 
-	err = k8s.DeleteIngress(namespace, name)
-	if err != nil {
-		progress["status"].(gin.H)["ingress"] = err.Error()
-		progress["error"] = true
-	} else {
-		progress["status"].(gin.H)["ingress"] = "success"
-	}
+	//	err = k8s.DeleteIngress(namespace, name)
+	//	if err != nil {
+	//		progress["status"].(gin.H)["ingress"] = err.Error()
+	//		progress["error"] = true
+	//	} else {
+	//		progress["status"].(gin.H)["ingress"] = "success"
+	//	}
 
 	if progress["error"] == false {
 		c.JSON(http.StatusOK, progress)

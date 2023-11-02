@@ -44,15 +44,21 @@ var DefaultServerDeployment = &appsv1.Deployment{
 						},
 						Ports: []apiv1.ContainerPort{
 							{
-								Name:          "http",
+								Name:          "tcp",
 								Protocol:      apiv1.ProtocolTCP,
-								ContainerPort: 8080,
+								ContainerPort: 27015,
+							},
+							{
+								Name:          "udp",
+								Protocol:      apiv1.ProtocolUDP,
+								ContainerPort: 27015,
 							},
 						},
 						Env: []apiv1.EnvVar{
 							{Name: "STEAMGUARD", Value: "REPLACE"},
 							{Name: "STEAMUSER", Value: "REPLACE"},
 							{Name: "STEAMPASS", Value: "REPLACE"},
+							{Name: "CS2_ADDITIONAL_ARGS", Value: "-insecure +servercfgfile server.cfg"},
 						},
 					},
 				},

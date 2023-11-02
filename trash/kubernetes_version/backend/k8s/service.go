@@ -28,6 +28,7 @@ func CreateService(namespace, name string) (*coreV1.Service, error) {
 			Name: name,
 		},
 		coreV1.ServiceSpec{
+			Type: "NodePort",
 			Selector: map[string]string{
 				"app":       name,
 				"namespace": namespace,
@@ -35,17 +36,21 @@ func CreateService(namespace, name string) (*coreV1.Service, error) {
 			Ports: []coreV1.ServicePort{
 				{
 					Name:       "tcp",
-					Port:       8080,
+					Port:       27015,
 					Protocol:   apiv1.ProtocolTCP,
-					TargetPort: intstr.FromInt32(8080),
+					TargetPort: intstr.FromInt32(27015),
+				},
+				{
+					Name:       "udp",
+					Port:       27015,
+					Protocol:   apiv1.ProtocolUDP,
+					TargetPort: intstr.FromInt32(27015),
 				},
 			},
 		}, coreV1.ServiceStatus{},
 	}
 
-	service, err := k8sClient.CoreV1().Services(namespace).Create(
-		context.TODO(), service2Create, metav1.CreateOptions{},
-	)
+	service, err := k8sClient.CoreV1().Services(namespace).Create(context.TODO(), service2Create, metav1.CreateOptions{})
 	if err != nil {
 		return nil, err
 	}

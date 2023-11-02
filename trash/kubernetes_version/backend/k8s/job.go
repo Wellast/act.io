@@ -55,13 +55,18 @@ var DefaultSteamJob = v1.Job{
 	},
 }
 
-func GetJob(namespace, name string) (*v1.Job, error) {
+func GetJob(namespace, name string) (*v1.Job, *v1.JobList, error) {
 	job, err := k8sClient.BatchV1().Jobs(namespace).Get(context.TODO(), name, metav1.GetOptions{})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return job, nil
+	jobList, err := k8sClient.BatchV1().Jobs(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return job, jobList, nil
 }
 
 func CreateJob(namespace string, job v1.Job) (*v1.Job, error) {

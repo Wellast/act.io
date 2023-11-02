@@ -1,0 +1,4 @@
+ec2_conf: 
+    image: "ami-06dd92ecc74fdfb36"
+    subnet_id: "subnet-06bc03ec2e31cc398"
+    instance_type: "t2.medium"

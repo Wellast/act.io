@@ -116,13 +116,13 @@ func createDeployment(c *gin.Context) {
 	}
 
 	//	INGRESS
-	_, err = k8s.CreateIngress(namespace, name)
-	if err != nil {
-		progress["status"].(gin.H)["ingress"] = err.Error()
-		progress["error"] = true
-	} else {
-		progress["status"].(gin.H)["ingress"] = "success"
-	}
+	//	_, err = k8s.CreateIngress(namespace, name)
+	//	if err != nil {
+	//		progress["status"].(gin.H)["ingress"] = err.Error()
+	//		progress["error"] = true
+	//	} else {
+	//		progress["status"].(gin.H)["ingress"] = "success"
+	//	}
 
 	if progress["error"] == false {
 		c.JSON(http.StatusOK, progress)
