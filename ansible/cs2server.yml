@@ -1,13 +1,21 @@
 ---
-#- hosts: localhost
-#  gather_facts: false
-#  vars:
-#    reqOwner: ""
-#    reqName: ""
-#  roles: [ infra ]
+- hosts: localhost
+  gather_facts: false
+  vars: 
+    reqOwner: "" #ARG
+    reqName: "" #ARG
+  roles: [ infra ]
 
 - hosts: "{{ reqOwner }}-{{ reqName }}"
-  remote_user: ubuntu
+  remote_user: admin
   vars: 
-    sharedEFSAddress: "{{ sefs_info.efs[0].filesystem_address | default('fs-00d7e48bcf9186570.efs.eu-central-1.amazonaws.com:/') }}"
-  roles: [ cs2server ]
+    sharedEFSAddress: "{{ sefs_info.efs[0].filesystem_address }}"
+  roles: [ prepare ]
+
+- hosts: "{{ reqOwner }}-{{ reqName }}"
+  remote_user: steam
+  gather_facts: false
+  vars: 
+    steamUser: "" #ARG
+    steamPass: "" #ARG
+  roles: [ steamcmd, gameserver ]

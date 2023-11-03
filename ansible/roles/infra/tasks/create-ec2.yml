@@ -1,6 +1,7 @@
 - name: Create EC2
   register: ec2
   amazon.aws.ec2_instance: 
+      state: running
       region: "{{ region }}"
       name: "{{ reqOwner }}-{{ reqName }}"
       key_name: "{{ aws_conf.ssh_key }}"
@@ -11,9 +12,9 @@
           assign_public_ip: true
       image_id: "{{ ec2_image }}"
       volumes: 
-          - device_name: /dev/sda1
+          - device_name: /dev/xvda
             ebs: 
-                volume_size: 45
+                volume_size: 40
                 delete_on_termination: true
       tags: 
           region: "{{ region }}"

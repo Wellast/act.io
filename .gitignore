@@ -6,3 +6,4 @@ package-lock.json
 .vscode
 infra/volume
 config.yaml
+prod.sh
