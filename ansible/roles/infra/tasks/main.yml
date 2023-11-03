@@ -1,1 +1,7 @@
-- import_task: create-ec2.yml
+- block: 
+  - fail: msg="Region must be specified"
+    when: region == ""
+  - include_vars: file="{{ region }}.yml"
+
+- include: get-net-info.yml
+- include: create-ec2.yml

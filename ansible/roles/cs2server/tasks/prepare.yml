@@ -1,0 +1,75 @@
+- name: Install packages
+  become: true
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ install_packages }}"
+
+- block:
+  - name: Git clone efs-utils
+    register: clone_status
+    git:
+      repo: https://github.com/aws/efs-utils.git
+      dest: /home/ubuntu/efs-utils
+      single_branch: yes
+      version: master
+  - name: "Shell: make deb"
+    shell: cd /home/ubuntu/efs-utils && make deb
+    when: clone_status.changed == true
+  - name: Get files from /home/ubuntu/efs-utils/build/
+    find:
+      paths: /home/ubuntu/efs-utils/build/
+      patterns: "*.deb"
+      recurse: no
+      file_type: file
+    when: clone_status.changed == true
+    register: found_deb
+  - name: Install package
+    become: true
+    apt:
+      update_cache: yes
+      deb: "{{ found_deb.files[0].path }}"
+    when: clone_status.changed == true
+
+- block:
+  - name: Create steam user
+    become: true
+    ansible.builtin.user: 
+        name: steam
+        uid: 1730
+        shell: /bin/zsh
+        create_home: true
+        password: "1"
+  - name: (Optional) Append cd /home/steam to .bashrc
+    block: 
+        - name: Test for line
+          become: true
+          shell: grep -c "^cd \$HOME" /home/steam/.bashrc || true
+          register: test_grep
+        - name: Add cd /home/steam if does not exists
+          become: true
+          lineinfile: 
+              dest: /home/steam/.bashrc
+              line: "cd $HOME"
+          when: test_grep.stdout == "0"
+
+- block:
+  - name: Create directory
+    become: true
+    file:
+      path: /mnt/{{ aws_conf.shared_efs_name}}
+      state: directory
+  - name: Grant access to steam user
+    become: true
+    file:
+      dest: /mnt/{{ aws_conf.shared_efs_name}}
+      owner: steam
+      mode: u=rwX,g=rX,o=rX
+  - name: Mount an NFS volume
+    become: true
+    mount:
+      src: "{{ sharedEFSAddress }}"
+      path: /mnt/{{ aws_conf.shared_efs_name}}
+      opts: tls
+      state: mounted
+      fstype: efs

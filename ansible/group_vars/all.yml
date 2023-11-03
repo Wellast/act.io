@@ -1,0 +1,6 @@
+aws_conf: 
+    ssh_key: "ilya.maximov"
+    vpc_name: main
+    subnet_name: public-a
+    sg_name: cs2sg
+    shared_efs_name: cs2data

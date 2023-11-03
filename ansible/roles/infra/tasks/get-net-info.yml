@@ -1,0 +1,39 @@
+- block: 
+    - name: "Retrieve vpc info"
+      register: vpc_main
+      amazon.aws.ec2_vpc_net_info: 
+          region: "{{ region }}"
+          filters: 
+              "tag:Name": "{{ aws_conf.vpc_name }}"
+    - name: "VPC output"
+      debug: msg="{{ vpc_main.vpcs }}"
+
+- block: 
+    - name: "Retrieve subnets info"
+      register: subnets_info
+      amazon.aws.ec2_vpc_subnet_info: 
+          region: "{{ region }}"
+          filters: 
+              "tag:Name": "{{ aws_conf.subnet_name }}"
+    - name: "Subnets output"
+      debug: msg="{{ subnets_info.subnets }}"
+
+- block: 
+    - name: "Retrieve security group info"
+      register: sg_info
+      amazon.aws.ec2_group_info: 
+          region: "{{ region }}"
+          filters: 
+              "tag:Name": "{{ aws_conf.sg_name }}"
+    - name: "Security group output"
+      debug: msg="{{ sg_info }}"
+
+- block: 
+    - name: "Retrieve shared EFS info"
+      register: sefs_info
+      community.aws.efs_info: 
+          region: "{{ region }}"
+          tags: 
+              Name: "{{ aws_conf.shared_efs_name }}"
+    - name: "Shared EFS output"
+      debug: msg="{{ sefs_info.efs[0] }}"
