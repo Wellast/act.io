@@ -1,0 +1,15 @@
+- amazon.aws.ec2_vpc_net_info: 
+      register: vpc_info
+      filters: 
+          "tag:Name": main
+
+- debug: msg=vpc_info
+
+#- name: Create subnet for cs2game servers
+#  amazon.aws.ec2_vpc_subnet:
+#      state: present
+#      vpc_id: vpc-123456
+#      cidr: 10.0.1.16/28
+#      tags:
+#          Name: gameserver
+#  register: database_subnet
