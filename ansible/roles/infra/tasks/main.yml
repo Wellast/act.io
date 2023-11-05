@@ -5,3 +5,13 @@
 
 - include: get-net-info.yml
 - include: create-ec2.yml
+- include: create-vol.yml
+
+- name: Wait for SSH to come up
+  wait_for: 
+    host: "{{ ec2.instances[0].public_ip_address }}"
+    port: 22
+    state: started
+
+- name: Refresh inventory to ensure new instaces exist in inventory
+  meta: refresh_inventory

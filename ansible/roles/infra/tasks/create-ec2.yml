@@ -6,7 +6,7 @@
       name: "{{ reqOwner }}-{{ reqName }}"
       key_name: "{{ aws_conf.ssh_key }}"
       vpc_subnet_id: "{{ subnets_info.subnets[0].subnet_id }}"
-      instance_type: "{{ ec2_instance_type }}"
+      instance_type: "{{ aws_conf.ec2_instance_type }}"
       security_group: "{{ sg_info.security_groups[0].group_id }}"
       network: 
           assign_public_ip: true
@@ -14,23 +14,13 @@
       volumes: 
           - device_name: /dev/xvda
             ebs: 
-                volume_size: 40
+                volume_size: 8
+                volume_type: "{{ aws_conf.ec2_volume_type }}"
                 delete_on_termination: true
       tags: 
           region: "{{ region }}"
           reqName: "{{ reqName }}"
           reqOwner: "{{ reqOwner }}"
-          sharedEFS: "{{ sefs_info.efs[0].file_system_id }}"
-          sharedEFSAddress: "{{ sefs_info.efs[0].filesystem_address }}"
 
-- name: "EC2 output"
+- name: EC2 output
   debug: msg="{{ ec2.instances[0] }}"
-
-- name: Wait for SSH to come up
-  wait_for: 
-      host: "{{ ec2.instances[0].public_ip_address }}"
-      port: 22
-      state: started
-
-- name: Refresh inventory to ensure new instaces exist in inventory
-  meta: refresh_inventory

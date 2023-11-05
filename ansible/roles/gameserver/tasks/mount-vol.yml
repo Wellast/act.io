@@ -1,0 +1,27 @@
+- name: Create mountpoint directory
+  become: true
+  file: 
+    dest: "/mnt/{{ aws_conf.shared_efs_name}}"
+    owner: steam
+    state: directory
+    mode: u=rwX,g=rX,o=rX
+
+- block: 
+  - name: Retrieve mount device name
+    register: lsblk
+    shell: "echo \"/dev/$(lsblk -J | jq -rc '.blockdevices[1].name')\""
+  - debug: msg="{{ lsblk.stdout }}"
+
+- name: Create a ext4 filesystem on volume
+  become: true
+  community.general.filesystem: 
+    dev: "{{ lsblk.stdout }}"
+    fstype: ext4
+
+- name: Mount the partition
+  become: true
+  ansible.posix.mount: 
+    src: "{{ lsblk.stdout }}"
+    path: "/mnt/{{ aws_conf.shared_efs_name}}"
+    fstype: ext4
+    state: mounted

@@ -1,0 +1,15 @@
+[Unit]
+Description=gameserver
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=never
+RestartSec=1
+User=steam
+ExecStartPre=/bin/bash /home/steam/Steam/steamcmd.sh +force_install_dir /mnt/{{ aws_conf.shared_efs_name}} +login {{ steamUser }} {{ steamPass }} +app_update 730 +quit
+ExecStart=/mnt/{{ aws_conf.shared_efs_name}}/game/bin/linuxsteamrt64/cs2 {{ cs2conf.args | join(' ') }}
+
+[Install]
+WantedBy=multi-user.target

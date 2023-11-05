@@ -1,0 +1,37 @@
+- name: "Shell: dpkg --add-architecture i386"
+  shell: dpkg --add-architecture i386
+  become: true
+  tags: [ gameserver-utils ]
+
+- name: Check if steamcmd.sh exists
+  stat: path=/home/steam/Steam/steamcmd.sh
+  register: steamcmd_bin
+- when: steamcmd_bin.stat.exists == false
+  block: 
+    - name: Create directory
+      file: 
+        path: "{{ item }}"
+        state: directory
+      with_items: 
+        - /home/steam/Steam
+        - /home/steam/.steam
+        - /home/steam/.steam/sdk32
+        - /home/steam/.steam/sdk64
+    - name: Download steamcmd_linux.tar.gz
+      unarchive: 
+        src: https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz
+        dest: /home/steam/Steam
+        remote_src: yes
+    - name: "Shell: steamcmd.sh +quit"
+      shell: /bin/bash /home/steam/Steam/steamcmd.sh +quit
+    - name: Link the steamcmd executable
+      file: 
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: steam
+        state: link
+      with_items: 
+        - src: /home/steam/Steam/linux32/steamclient.so
+          dest: /home/steam/.steam/sdk32/steamclient.so
+        - src: /home/steam/Steam/linux64/steamclient.so
+          dest: /home/steam/.steam/sdk64/steamclient.so

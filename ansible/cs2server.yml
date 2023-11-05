@@ -2,20 +2,40 @@
 - hosts: localhost
   gather_facts: false
   vars: 
-    reqOwner: "" #ARG
-    reqName: "" #ARG
+    reqOwner: "" # -e reqOwner=ARG
+    reqName: "" # -e reqName=ARG
   roles: [ infra ]
+  tags: [ infra ]
 
 - hosts: "{{ reqOwner }}-{{ reqName }}"
+  gather_facts: false
   remote_user: admin
   vars: 
-    sharedEFSAddress: "{{ sefs_info.efs[0].filesystem_address }}"
+    vol: "{{ hostvars['localhost']['vol'] }}"
   roles: [ prepare ]
+  tags: [ prepare ]
 
 - hosts: "{{ reqOwner }}-{{ reqName }}"
+  gather_facts: false
   remote_user: steam
   gather_facts: false
   vars: 
-    steamUser: "" #ARG
-    steamPass: "" #ARG
-  roles: [ steamcmd, gameserver ]
+    steamUser: "" # -e steamUser=ARG
+    steamPass: "" # -e steamPass=ARG
+    ansible_become_password: "{{ steam_user_pass }}"
+  roles: [ gameserver ]
+  tags: [ gameserver ]
+
+- hosts: localhost
+  gather_facts: false
+  tasks: 
+    - name: Assign DNS for new ec2
+      amazon.aws.route53: 
+        state: present
+        zone: actio.live
+        record: "{{ reqName }}-{{ reqOwner }}.actio.live"
+        type: A
+        ttl: 7200
+        value: "{{ hostvars['localhost']['ec2'].instances[0].public_ip_address }}"
+        wait: true
+  tags: [ dns ]

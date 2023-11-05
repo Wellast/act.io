@@ -1,0 +1,14 @@
+cs2conf: 
+    args: 
+        - -dedicated
+        - -usercon
+        - -console
+        - -secure
+        - -dev
+        - +game_type 1
+        - +game_mode 2
+        - +sv_logfile 1
+        - -serverlogging
+        - +sv_setsteamaccount {{ steam_account }}
+        - +map de_dust2
+        - +exec server.cfg

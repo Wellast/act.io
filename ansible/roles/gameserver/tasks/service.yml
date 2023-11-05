@@ -1,0 +1,19 @@
+- name: Copy templates
+  become: true
+  template: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: steam
+  with_items: 
+    - src: server.cfg
+      dest: /mnt/{{ aws_conf.shared_efs_name }}/game/csgo/cfg/server.cfg
+    - src: gameserver.service
+      dest: /etc/systemd/system/gameserver.service
+
+- name: systemd daemon reload
+  become: true
+  systemd: daemon_reload=true
+
+- name: Restart gameserver.service
+  become: true
+  systemd: state=restarted name=gameserver

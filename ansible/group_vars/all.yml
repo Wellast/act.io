@@ -1,6 +1,13 @@
 aws_conf: 
-    ssh_key: "ilya.maximov"
+    ssh_key: ilya.maximov
     vpc_name: main
     subnet_name: public-a
     sg_name: cs2sg
     shared_efs_name: cs2data
+    vol_volume_size: 40
+    vol_device_name: /dev/xvds
+    ec2_instance_type: t2.medium
+    ec2_volume_type: standard
+
+steam_user_pass: steam
+steam_account: ED9F5E5F93B8FC5FD726C2B1FA1FF2E1

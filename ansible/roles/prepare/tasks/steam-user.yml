@@ -1,0 +1,36 @@
+- name: Create steam user
+  become: true
+  user: 
+    name: steam
+    uid: 1730
+    shell: /bin/bash
+    create_home: true
+    groups: adm,systemd-journal,sudo
+    password: "{{ steam_user_pass | password_hash('sha512', 'steam') }}"
+
+- name: (Optional) Append cd /home/steam to .bashrc
+  block: 
+    - name: Add cd /home/steam if does not exists
+      become: true
+      lineinfile: 
+        dest: /home/steam/.bashrc
+        line: "cd $HOME"
+    - name: Create directory /home/steam/.ssh
+      become: true
+      file: 
+        path: /home/steam/.ssh
+        state: directory
+        owner: steam
+        group: steam
+        mode: '0700'
+
+- name: Copy /home/admin/.ssh/authorized_keys
+  become: true
+  copy: 
+    src: /home/admin/.ssh/authorized_keys
+    dest: /home/steam/.ssh/authorized_keys
+    owner: steam
+    group: steam
+    mode: '0600'
+    remote_src: true
+ 

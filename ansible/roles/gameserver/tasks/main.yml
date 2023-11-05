@@ -1,3 +1,8 @@
-#- name: "steamcmd.sh: +login"
-#  shell: "/bin/bash $HOME/Steam/steamcmd.sh +force_install_dir /mnt/{{ aws_conf.shared_efs_name}} +login {{ steamUser }} {{ steamPass }} +app_update 730 +quit"
+- include: mount-vol.yml
+  tags: [ gameserver-mount-vol ]
 
+- include: steamcmd.yml
+  tags: [ gameserver-steamcmd ]
+
+- include: service.yml
+  tags: [ gameserver-service ]

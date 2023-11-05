@@ -1,0 +1,8 @@
+install_packages: 
+    - git
+    - binutils
+    - make
+    - htop
+    - lib32gcc-s1
+    - lsof
+    - jq
